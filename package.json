@@ -1,0 +1,57 @@
+{
+	"name": "rgss_splitter",
+	"displayName": "RGSS Splitter",
+	"description": "将rxdata,rvdata或rvdata2拆分为单独的.rb文件",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.33.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"main": "./out/extension.js",
+	"activationEvents": [
+		"onCommand:RGSSSplitter.splitter"
+	],
+	"contributes": {
+		"commands": [
+			{
+				"title": "rgss文件拆包",
+				"command": "RGSSSplitter.splitter"
+			}
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "RGSSSplitter.splitter",
+					"when": "resourceExtname==.rvdata2"
+				},
+				{
+					"command": "RGSSSplitter.splitter",
+					"when": "resourceExtname==.rvdata"
+				},
+				{
+					"command": "RGSSSplitter.splitter",
+					"when": "resourceExtname==.rxdata"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "npm run compile && node ./node_modules/vscode/bin/test"
+	},
+	"devDependencies": {
+		"typescript": "^3.3.1",
+		"vscode": "^1.1.28",
+		"tslint": "^5.12.1",
+		"@types/node": "^10.12.21",
+		"@types/mocha": "^2.2.42"
+	},
+	"dependencies": {
+		"mocha": "^6.1.4"
+	}
+}
