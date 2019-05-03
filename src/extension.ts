@@ -3,8 +3,8 @@
 import * as vscode from 'vscode';
 import * as Marshal from './Marshal';
 import * as Splitter from './Splitter';
-import {promisify} from 'util';
-import {readFile, writeFile } from 'fs';
+import { promisify } from 'util';
+import { readFile, writeFile } from 'fs';
 import { resolve } from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 					"RGSS数据文件": ["rxdata", "rvdata", "rvdata2"]
 				},
 				//"canSelectFolders": false,
-				"canSelectMany":false
+				"canSelectMany": false
 			})) || [undefined];
 			if (!file) { return; }
 		}
@@ -30,24 +30,31 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}
 		switch (Splitter.type(obj)) {
-			case (Splitter.RGSSType.Script):{
-				try{
-					let arr = Splitter.splitterScripts(obj);
-					let [folder]= (await vscode.window.showOpenDialog({
-						"canSelectFiles":false,
-						"canSelectFolders":true,
-						"canSelectMany":false
-					}))||[undefined];
-					if(folder===undefined){return;}
-					await Promise.all(arr.map((obj)=>promisify(writeFile)(resolve((<vscode.Uri>folder).fsPath,`./${obj.name}.rb`),obj.data)));
-					vscode.window.showInformationMessage("转换完成");
-				}catch(e){
-					if(e instanceof(Splitter.EmptyNameError)){
-						vscode.window.showErrorMessage("有脚本页没名字");
-					}else if(e instanceof(Splitter.DuplicatedScriptNameError)){
-						vscode.window.showErrorMessage("脚本页重名");
+			case (Splitter.RGSSType.Script): {
+				let arr;
+				try {
+					arr = Splitter.splitterScripts(obj);
+				} catch (e) {
+					if (e instanceof (Splitter.UnexpectedFormatError)) {
+						return vscode.window.showErrorMessage("非预期的脚本格式");
 					}
+					throw e;
 				}
+				if (arr.find(obj => obj.name === "")) {
+					return vscode.window.showErrorMessage("有脚本页没名字");
+				}
+				let duplicated = arr.map((obj) => obj.name).filter(((name, index, names) => names.includes(name, index + 1)));
+				if (duplicated.length !== 0) {
+					return vscode.window.showErrorMessage(`脚本页重名:${[...new Set(duplicated)]}`);
+				}
+				let [folder] = (await vscode.window.showOpenDialog({
+					"canSelectFiles": false,
+					"canSelectFolders": true,
+					"canSelectMany": false
+				})) || [undefined];
+				if (folder === undefined) { return; }
+				await Promise.all(arr.map((obj) => promisify(writeFile)(resolve((<vscode.Uri>folder).fsPath, `./${obj.name}.rb`), obj.data)));
+				vscode.window.showInformationMessage("转换完成");
 				break;
 			}
 			default:

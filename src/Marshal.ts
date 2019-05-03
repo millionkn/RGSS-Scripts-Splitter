@@ -1,39 +1,41 @@
 type Counter = (num: number) => number;
 type Version = [number, number];
-type Arg = {
+type LoadArgs = {
     next: Counter,
     version: Version,
-    buffer: Buffer
+    buffer: Buffer,
+    symbol: Array<string>,
+    object: Array<Object>
 };
-export class UnknowTypeError extends Error{
-    public type:string;
-    constructor(type:string){
+export class UnknowTypeError extends Error {
+    public type: string;
+    constructor(type: string) {
         super(type);
-        this.type=type;
+        this.type = type;
     }
 }
-export class ResolutionError extends Error{}
+export class ResolutionError extends Error { }
 export function resolution(buffer: Buffer) {
     var next = Counter(0);
-    try{
+    try {
         return read({
-            buffer, next, version: [
+            buffer, next, symbol:[],object:[], version: [
                 buffer.readUInt8(next(1)),
                 buffer.readUInt8(next(1))
             ]
         });
-    }catch(e){
-        if(e instanceof UnknowTypeError){
+    } catch (e) {
+        if (e instanceof UnknowTypeError) {
             throw e;
-        }else{
+        } else {
             throw new ResolutionError();
         }
     }
-    
+
 
 }
 
-function readNumber({ buffer, next}: Arg): number {
+function readNumber({ buffer, next }: LoadArgs): number {
     var char = buffer.readInt8(next(1));
     if (char < -4 || char === 0 || char > 4) { return char === 0 ? 0 : char < 0 ? char + 5 : char - 5; }
     var arr: Array<number> = [];
@@ -44,15 +46,15 @@ function readNumber({ buffer, next}: Arg): number {
     if (char < 0) { result = -result; }
     return result;
 }
-function readStringBuffer(args: Arg): Buffer {
+function readStringBuffer(args: LoadArgs): Buffer {
     let length = readNumber(args);
     let start = args.next(length);
     let end = start + length;
     return args.buffer.slice(start, end);
 }
-function read(args: Arg): any {
+function read(args: LoadArgs): any {
     let { next, buffer } = args;
-    let type=buffer.readUInt8(next(1));
+    let type = buffer.readUInt8(next(1));
     switch (type) {
         case 0x69://Fixnum
             return readNumber(args);
@@ -68,7 +70,9 @@ function read(args: Arg): any {
             for (let i = 0; i < length; i++) { arr.push(read(args)); }
             return arr;
         } case 0x3a: {//Symbol
-            return ':' + readStringBuffer(args).toString('latin1');
+            return args.symbol[args.symbol.push(':' +readStringBuffer(args).toString('latin1'))];
+        }case 0x3b:{//Symbol连接
+            return args.symbol[readNumber(args)];
         } case 0x22: {//String
             return readStringBuffer(args).toString('latin1');
         } case 0x49: {//有自定义成员的拓展基本类型
@@ -92,6 +96,6 @@ function read(args: Arg): any {
 
     }
 }
-function Counter(start: number): Counter{
+function Counter(start: number): Counter {
     return ((index) => (num: number) => (index += num) - num)(start);
 }

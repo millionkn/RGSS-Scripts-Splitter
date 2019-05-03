@@ -1,15 +1,11 @@
-import * as fs from "fs";
 import * as zlib from 'zlib';
-import * as Marshal from './Marshal';
-import { resolve } from "path";
+
+export class UnexpectedFormatError extends Error { }
 export enum RGSSType {
     Unknow,
     Script
 }
-type ScriptPage = [number, string, string];
-export class DuplicatedScriptNameError extends Error { }
-export class EmptyNameError extends Error { }
-
+type ScriptPage = [number, String, string];
 export function type(obj: any): RGSSType {
     if (obj instanceof Array) {
         let arr = <Array<Object>>obj;
@@ -20,19 +16,11 @@ export function type(obj: any): RGSSType {
     return RGSSType.Unknow;
 }
 export function splitterScripts(arr: Array<ScriptPage>): Array<{ name: string, data: string }> {
-    if (type(arr) !== RGSSType.Script) { throw new Error("非预期格式"); }
-    let names = arr.map((page) => (<ScriptPage>page)[1]);
-    if (names.includes("")) { throw new EmptyNameError(); }
-    let duplicated = names.filter((name, index) => names.includes(name, index + 1));
-    if (duplicated.length !== 0) { throw new DuplicatedScriptNameError(`${[...new Set(duplicated)]}`); }
-    try {
-        return arr.map((page) =>{
-            return {
-                name:page[1],
-                data:zlib.inflateSync(Buffer.from(page[2], 'latin1')).toString()
-            };
-        });
-    } catch (e) {
-        throw e;
-    }
+    if (type(arr) !== RGSSType.Script) { throw new UnexpectedFormatError(); }
+    return arr.map((page) =>{
+        return {
+            name:page[1].valueOf(),
+            data:zlib.inflateSync(Buffer.from(page[2], 'latin1')).toString()
+        };
+    });
 }
