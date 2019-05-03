@@ -1,4 +1,4 @@
-import {Marshal} from '../Marshal';
+import * as Marshal from '../Marshal';
 import * as assert from 'assert';
 import {readFileSync } from 'fs';
 import { resolve } from 'path';
@@ -10,7 +10,7 @@ suite("用法测试",()=>{
 });
 var dir = resolve(__dirname,"../../testResouse/Marshal/");
 var baseTest=(name:string,callback:(obj:any)=>any)=>
-        test(name,()=>callback((Marshal.load(readFileSync(resolve(dir,name))))));
+        test(name,()=>callback((Marshal.resolution(readFileSync(resolve(dir,name))))));
 suite("Marshal Tests", function () {
     
     baseTest("./Fixnum",(num)=>assert.equal(num,2**22));
@@ -40,4 +40,4 @@ suite("zlib", function () {
     baseTest('./Scripts2.rvdata2',(arr)=>{
         assert.equal(zlib.inflateSync(Buffer.from(arr[0][2],'latin1')).toString(),"");
     });
-})
+});
