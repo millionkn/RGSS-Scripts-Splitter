@@ -70,7 +70,7 @@ function read(args: LoadArgs): any {
             for (let i = 0; i < length; i++) { arr.push(read(args)); }
             return arr;
         } case 0x3a: {//Symbol
-            return args.symbol[args.symbol.push(':' +readStringBuffer(args).toString('latin1'))];
+            return args.symbol[args.symbol.push(':' +readStringBuffer(args).toString('latin1'))-1];
         }case 0x3b:{//Symbol连接
             return args.symbol[readNumber(args)];
         } case 0x22: {//String
