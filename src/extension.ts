@@ -1,8 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as Marshal from './RGSS-data-export/Marshal';
-import * as Splitter from './RGSS-data-export';
+import * as RGSSExport from './RGSS-data-export';
 import { promisify } from 'util';
 import { readFile, writeFile } from 'fs';
 import { resolve } from 'path';
@@ -21,21 +20,21 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		let obj;
 		try {
-			obj = Marshal.resolution(await promisify(readFile)(file.fsPath));
+			obj = RGSSExport.resolution(await promisify(readFile)(file.fsPath));
 		} catch (e) {
-			if (e instanceof Marshal.UnknowTypeError) {
+			if (e instanceof RGSSExport.UnknowTypeError) {
 				vscode.window.showErrorMessage(`未知的Marshal标识符:${e.type}`);
-			} else/*(e instance of Marshal.ResolutionError)*/ {
+			} else/*(e instance of RGSSExport.ResolutionError)*/ {
 				vscode.window.showErrorMessage("解析文件失败");
 			}
 		}
-		switch (Splitter.type(obj)) {
-			case (Splitter.RGSSType.Script): {
+		switch (RGSSExport.type(obj)) {
+			case (RGSSExport.RGSSType.Script): {
 				let arr;
 				try {
-					arr = Splitter.splitterScripts(obj);
+					arr = RGSSExport.splitterScripts(obj);
 				} catch (e) {
-					if (e instanceof (Splitter.UnexpectedFormatError)) {
+					if (e instanceof (RGSSExport.UnexpectedFormatError)) {
 						return vscode.window.showErrorMessage("非预期的脚本格式");
 					}
 					throw e;

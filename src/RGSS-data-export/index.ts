@@ -1,6 +1,7 @@
 import * as zlib from 'zlib';
 
 export class UnexpectedFormatError extends Error { }
+export * from "./Marshal";
 export enum RGSSType {
     Unknow,
     Script
