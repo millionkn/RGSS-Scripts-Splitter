@@ -8,7 +8,7 @@ suite("用法测试",()=>{
         assert.equal(new String("abc").toString(),new String(Buffer.from("abc")).toString());
     });
 });
-var dir = resolve(__dirname,"../../testResouse/Marshal/");
+var dir = "testResouse/Marshal/";
 var baseTest=(name:string,callback:(obj:any)=>any)=>
         test(name,()=>callback((Marshal.resolution(readFileSync(resolve(dir,name))))));
 suite("Marshal Tests", function () {
