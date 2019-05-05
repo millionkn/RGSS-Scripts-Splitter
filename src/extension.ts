@@ -1,8 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as Marshal from './Marshal';
-import * as Splitter from './Splitter';
+import * as Marshal from './RGSS-data-export/Marshal';
+import * as Splitter from './RGSS-data-export';
 import { promisify } from 'util';
 import { readFile, writeFile } from 'fs';
 import { resolve } from 'path';
